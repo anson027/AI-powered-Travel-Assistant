@@ -50,6 +50,4 @@ async def chat_endpoint(request:ChatRequest):
       parts=[p.strip() for p in clean_line.split(', ')]
       if len(parts)>=2:
         final_list.append(parts)
-  print("Sessions:",sessions)
-  print("Final list:",final_list)
   return {'reply': final_list}
