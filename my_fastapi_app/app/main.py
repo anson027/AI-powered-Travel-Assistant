@@ -20,23 +20,19 @@ class ChatRequest(BaseModel):
 
 @app.post('/')
 async def chat_endpoint(request:ChatRequest):
-  user_id=request.session_id
+  user_id=0
   user_text=request.message
   if user_id not in sessions:
     sessions[user_id]=[
       {
         "role": "system",
-        "content": """You are the 'Travel AI Explorer' Lead Planner.
-        INSTRUCTIONS:
-        - List options using numbered format: 1) , 2) , etc.
-        - Each item must be on a SINGLE LINE in this format: Name, Price, Rating.
-        - Do not include any introductory or concluding text."""
+        "content": "You are the Travel AI. List options as: Name, Price, Rating. No extra text."
       }
     ]
   sessions[user_id].append({'role': 'user', 'content': user_text})
   
   response=ollama.chat(
-    model='llama3.2:1b',
+    model='llama3.2:3b',
     messages=sessions[user_id],
     stream=False,
     options={'temperature':0}
@@ -45,11 +41,15 @@ async def chat_endpoint(request:ChatRequest):
   model_reply=response['message']['content']
   sessions[user_id].append({'role':'assistant','content':model_reply})
   
-  clean_text=re.sub(r'[*]','',model_reply)
+  final_list=[]
+  lines=re.sub(r'[*]','',model_reply).strip().split('\n')
 
-  raw_items=clean_text.split('\n')
-
-  final_list=[item.split(', ') for item in raw_items]
+  for line in lines:
+    clean_line=re.sub(r'^\d+[\).]\s*', '', line).strip()
+    if clean_line:
+      parts=[p.strip() for p in clean_line.split(', ')]
+      if len(parts)>=2:
+        final_list.append(parts)
+  print("Sessions:",sessions)
   print("Final list:",final_list)
-  
   return {'reply': final_list}
