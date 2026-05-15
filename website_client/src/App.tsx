@@ -1,9 +1,8 @@
-// Hai
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 
-// 1. Updated Type: Added 'hotels' to handle the structured data
+
 type Message = {
   id: number;
   text: string;
@@ -49,10 +48,8 @@ const App: React.FC = () => {
       const data = await response.json();
 
       setTimeout(() => {
-        // 2. Logic to parse the nested list [['Name', 'Price', 'Rating'], ...]
         const parsedHotels = Array.isArray(data.reply) ? data.reply.map((hotelArr: string[]) => {
           return {
-            // Extracts everything before price, removes leading numbers (e.g., "1. ")
             name: hotelArr.slice(0, hotelArr.length - 2).join(' ').replace(/^\d+\.\s/, ''),
             price: hotelArr[hotelArr.length - 2],
             rating: hotelArr[hotelArr.length - 1]
@@ -72,7 +69,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Rest of your functions (handleNewChat, RenderPage) remain the same...
   const handleNewChat = () => {
     if (messages.length > 0) {
       const title = messages.find(m => m.sender === 'user')?.text.substring(0, 20) || "New Trip Plan";
